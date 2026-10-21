@@ -6,6 +6,7 @@ __author__ = ["Marvin Lorber", "Alexandra Mielke"]
 
 import copy
 from enum import StrEnum, Enum
+from pathlib import Path
 from typing import Sequence
 
 
@@ -14,6 +15,8 @@ class ExperimentTypes(StrEnum):
     BOTTLENECK = "bottleneck"
     # Rope sessions that used only the two contact pages of the Bottleneck form
     ROPE_SHORT = "rope_short"
+    # first Typst/layout-based questionnaire (src/layouts/*.json); see README
+    TEST_E2E = "test_e2e"
 
     @classmethod
     def _missing_(cls, value):
@@ -569,8 +572,23 @@ class RopeShort(Template):
 
 
 class GrabExperiment:
+    # layout (JSON)-based questionnaires: type -> layout file
+    _layout_files = {
+        ExperimentTypes.TEST_E2E:
+            Path(__file__).resolve().parent / "layouts" / "test_e2e_layout.json",
+    }
+
     @staticmethod
     def initType(experimentType: str) -> Template:
+        if experimentType in GrabExperiment._layout_files:
+            path = GrabExperiment._layout_files[experimentType]
+            if not path.is_file():
+                raise RuntimeError(
+                    f"layout file for experiment type {experimentType!r} not found: {path}")
+            # deferred: questionnaire_layout imports this module by file path
+            from src import questionnaire_layout
+            return questionnaire_layout.build_template(
+                questionnaire_layout.load_layout(path))
         if experimentType == ExperimentTypes.ROPE:
             return Rope()
         elif experimentType == ExperimentTypes.BOTTLENECK:

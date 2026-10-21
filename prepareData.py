@@ -217,7 +217,9 @@ class pdfConverter:
 def main():
     parser = argparse.ArgumentParser(description="Prepare PDF questionnaires for annotation")
     parser.add_argument("expDir", type=str, help="Directory containing PDF files to process")
-    parser.add_argument("expType", type=str, help="Experiment type (rope, bottleneck or rope_short)")
+    parser.add_argument("expType", type=str,
+                        help="Experiment type (rope, bottleneck, rope_short or a "
+                             "layout-based type such as test_e2e)")
     args = parser.parse_args()
 
     expDir = args.expDir
