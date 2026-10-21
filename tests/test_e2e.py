@@ -81,7 +81,7 @@ def test_template_structure(exported):
     assert by_num[2].questionText == "Welche Tätigkeiten haben Sie während der Übung ausgeführt?"
     assert by_num[5].questionText == "Wie sicher haben Sie sich in jeder Handposition gefühlt?"
 
-    # q1: 5 checkboxes + 1 freetext (1600x400)
+    # q1: 5 checkboxes (2-column grid) + 1 freetext (1600x560)
     q1 = by_num[1]
     assert len(q1.checkboxes) == approx(5)
     assert [c.text for c in q1.checkboxes] == [
@@ -89,7 +89,7 @@ def test_template_structure(exported):
     ]
     assert len(q1.texts) == approx(1)
     assert q1.texts[0].size_x == approx(1600, abs=1)
-    assert q1.texts[0].size_y == approx(400, abs=1)
+    assert q1.texts[0].size_y == approx(560, abs=1)
     assert len(q1.tables) == approx(0)
 
     # q2: one 3x5 table, no checkbox / freetext
@@ -111,11 +111,11 @@ def test_template_structure(exported):
         "nie", "einmal", "zweimal", "dreimal", "öfter als dreimal",
     ]
 
-    # q4: 1 freetext (2800x520) + 1 checkbox
+    # q4: 1 freetext (2800x640) + 1 checkbox
     q4 = by_num[4]
     assert len(q4.texts) == approx(1)
     assert q4.texts[0].size_x == approx(2800, abs=1)
-    assert q4.texts[0].size_y == approx(520, abs=1)
+    assert q4.texts[0].size_y == approx(640, abs=1)
     assert len(q4.checkboxes) == approx(1)
     assert q4.checkboxes[0].text == "Nichts ist aufgefallen"
 
@@ -152,6 +152,8 @@ def test_participant_number(exported):
     assert pn.digits == approx(4)
     assert pn.w == approx(660, abs=1)
     assert pn.h == approx(200, abs=1)
+    # the row is centered horizontally on the page
+    assert pn.dx == approx(1314, abs=2)
 
     area = exported["template"].get_participant_number()
     assert area is not None
@@ -160,6 +162,31 @@ def test_participant_number(exported):
     assert area.dy == approx(pn.dy, abs=1)
     assert area.size_x == approx(660, abs=1)
     assert area.size_y == approx(200, abs=1)
+
+
+def test_checkbox_grid_columns(exported):
+    """The multi-column helper lays checkboxes out row-major in equal-width
+    columns: Q1's five options need two rows of three, so the first three sit
+    on one line and the remaining two start the next row."""
+    boxes = {(e.question, e.text): e
+             for e in exported["layout"].elements if e.kind == "checkbox"}
+
+    first = boxes[(1, "sehr gut")]
+    second = boxes[(1, "gut")]
+    third = boxes[(1, "eher schlecht")]
+    assert second.dy == approx(first.dy, abs=1)
+    assert third.dy == approx(first.dy, abs=1)
+    # equal column pitch (~1068 px across the text width)
+    assert second.dx - first.dx == approx(1068, abs=2)
+    assert third.dx - second.dx == approx(1068, abs=2)
+
+    fourth = boxes[(1, "schlecht")]
+    assert fourth.dx == approx(first.dx, abs=2)
+    assert fourth.dy - first.dy == approx(126, abs=2)  # one grid row
+
+    for qnum in (1, 3, 6):
+        rows = {e.dy for e in boxes.values() if e.question == qnum}
+        assert len(rows) == approx(2), f"q{qnum} should need two rows"
 
 
 def test_every_checkbox_is_60x70(exported):
@@ -231,23 +258,23 @@ def test_questions_map_to_one_page_each(exported):
 def test_positions_are_sane(exported):
     elements = exported["layout"].elements
 
-    # known spots (measured with the Nummer header row in place)
+    # known spots (measured with the ID row, 33 mm top margin and grid layout)
     ja = next(e for e in elements if e.kind == "checkbox" and e.text == "sehr gut")
     assert ja.dx == approx(36, abs=2)
-    assert ja.dy == approx(923, abs=2)
+    assert ja.dy == approx(1021, abs=2)
     last = next(e for e in elements if e.kind == "checkbox" and e.text == "sehr anstrengend")
-    assert last.dx == approx(36, abs=2)
-    assert last.dy == approx(1960, abs=2)
+    assert last.dx == approx(1104, abs=2)  # second of three grid columns
+    assert last.dy == approx(1606, abs=2)
 
     # table anchors (dx of column 0, dy of row 0)
     q2 = next(e for e in elements if e.kind == "checkcell"
               and e.question == 2 and e.row == 0 and e.col == 0)
     assert q2.dx == approx(371, abs=2)
-    assert q2.dy == approx(2464, abs=2)
+    assert q2.dy == approx(2346, abs=2)
     q5 = next(e for e in elements if e.kind == "checkcell"
               and e.question == 5 and e.row == 0 and e.col == 0)
     assert q5.dx == approx(562, abs=2)
-    assert q5.dy == approx(424, abs=2)
+    assert q5.dy == approx(522, abs=2)
 
     # every element lands inside the deskewed page (A4 @ 500 dpi = 4134x5847)
     for e in elements:

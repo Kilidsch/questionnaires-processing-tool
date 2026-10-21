@@ -130,10 +130,11 @@ def test_template_structure(exported):
 def test_positions_are_sane(exported):
     elements = exported["layout"].elements
 
-    # a known checkbox: q1 "ja" sits at dx=36, dy=556 in the verified layout
+    # a known checkbox: q1 "ja" sits at dx=36; dy shifted with the 33 mm top
+    # margin (it was 556 with the old 28 mm margin)
     ja = next(e for e in elements if e.kind == "checkbox" and e.text == "ja")
     assert ja.dx == approx(36, abs=2)
-    assert ja.dy == approx(556, abs=2)
+    assert ja.dy == approx(655, abs=2)
     assert ja.w == approx(60, abs=1)
     assert ja.h == approx(70, abs=1)
 

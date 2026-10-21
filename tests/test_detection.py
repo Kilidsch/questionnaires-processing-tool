@@ -161,18 +161,18 @@ def test_freetext_crops_written(detection):
         assert os.path.isabs(path) and os.path.isfile(path)
         crop = cv2.imread(path)
         assert crop is not None
-        # q1: 1600x400, q4: 2800x520 (height x width)
+        # q1: 1600x560, q4: 2800x640 (height x width)
         h, w = crop.shape[:2]
         if qnum == 1:
             assert w == approx(1600, abs=2)
-            assert h == approx(400, abs=2)
+            assert h == approx(560, abs=2)
         else:
             assert w == approx(2800, abs=2)
-            assert h == approx(520, abs=2)
+            assert h == approx(640, abs=2)
 
 
 def test_participant_number_area(detection):
-    """The Nummer box row is exposed as the legacy participant-number area:
+    """The ID box row is exposed as the legacy participant-number area:
     it must cover the row of digit boxes on page 1, inside the page bounds."""
     pn = detection["template"].get_participant_number()
     assert pn is not None

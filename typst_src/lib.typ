@@ -27,8 +27,9 @@
 #let px = (n) => n * 25.4mm / 500
 
 // content area matching the old forms: below the top tags, above the bottom
-// tags, horizontally the old content extent (34.6 .. 193.1 mm)
-#let page-margins = (top: 28mm, bottom: 23.9mm, left: 34.6mm, right: 16.9mm)
+// tags, horizontally the old content extent (34.6 .. 193.1 mm). The top margin
+// keeps a visible gap between the corner tags and the first line of text.
+#let page-margins = (top: 33mm, bottom: 23.9mm, left: 34.6mm, right: 16.9mm)
 
 // one corner tag, centered on a page point (lengths from the page's top-left)
 #let corner-tag = (id, center) => place(top + left,
@@ -93,6 +94,28 @@
     ),
     text(size: 11pt, label),
   )
+}
+
+// several checkboxes laid out in a compact `columns`-column grid (row-major
+// order), e.g. to save vertical space for long option lists.
+//
+// Extraction is unaffected: every checkbox still emits its own record, and the
+// loader sorts elements by (page, dy, dx), which reproduces the given order.
+// `columns` may be an integer (equal columns) or an explicit column array.
+#let checkbox-grid = (labels, columns: 2, question: none) => {
+  // an integer means "n equal columns": plain `columns: 3` in a grid would be
+  // content-sized (auto) columns, which makes the spacing uneven
+  let cols = if type(columns) == int {
+    range(0, columns).map(_ => 1fr)
+  } else {
+    columns
+  }
+  block(width: 100%, grid(
+    columns: cols,
+    column-gutter: 12pt,
+    row-gutter: 8pt,
+    ..labels.map(label => checkbox(label, question: question)),
+  ))
 }
 
 // an empty ruled box (size in 500 dpi px) for handwritten answers
@@ -196,8 +219,9 @@
   )
 }
 
-// the participant-number header: a "Nummer:" label followed by `n` empty
-// boxes, one digit per box (sizes in 500 dpi px).
+// the participant-number header: an "ID" label followed by `n` empty boxes,
+// one digit per box (sizes in 500 dpi px). The row is centered horizontally;
+// the label is part of the row.
 //
 // Emits one "participant-number" record pinned to the top-left of the first
 // box and sized to the full row of boxes (label excluded). The annotation GUI
@@ -208,7 +232,7 @@
   let h = px(200)
   let gutter = px(20)
   let row-w = w * n + gutter * (n - 1)
-  let cells = (text(size: 11pt, "Nummer:"),)
+  let cells = (text(size: 11pt, "ID"),)
   for i in range(0, n) {
     let marker = if i == 0 {
       place(top + left,
@@ -217,36 +241,42 @@
     // box takes exactly one content child; `none` is fine for the other boxes
     cells.push(box(width: w, height: h, inset: 0pt, stroke: 0.5pt + black, marker))
   }
-  grid(
+  block(width: 100%, align(center, grid(
     columns: (auto, ..range(0, n).map(_ => w)),
     column-gutter: gutter,
-    align: center,
+    // `center` alone is horizontal only; `horizon` adds vertical centering
+    // so the "ID" caption sits mid-height of the digit boxes
+    align: center + horizon,
     ..cells,
-  )
+  )))
 }
 
 // a questionnaire: title, then all questions, 24pt apart, auto-paginating
-// (no manual page breaks; each element's page is read back from the layout).
+// (each element's page is read back from the layout).
 //
-// `questions` is an array of content (each entry a question(...) call);
-// it is spread into the stack's content children.
+// `questions` is an array of content (each entry a question(...) call).
 //
-// `num-digits` > 0 puts the participant-number row ("Nummer" + one box per
-// digit) above the title; it is on by default, forms that predate it pass
+// `num-digits` > 0 puts the participant-number row ("ID" + one box per digit)
+// above the title; it is on by default, forms that predate it pass
 // `num-digits: 0`.
-#let template = (title, questions, num-digits: 4) => {
+//
+// `breaks` lists question numbers that start a new page, e.g. `breaks: (5,)`
+// (use it instead of sizing elements to force a break). The content is
+// emitted as top-level blocks rather than one `stack` because Typst forbids
+// `pagebreak()` inside a container.
+#let template = (title, questions, num-digits: 4, breaks: ()) => {
   if num-digits > 0 {
-    stack(
-      spacing: 24pt,
-      participant-number(num-digits),
-      text(size: 16pt, weight: "bold", title),
-      ..questions,
-    )
-  } else {
-    stack(
-      spacing: 24pt,
-      text(size: 16pt, weight: "bold", title),
-      ..questions,
-    )
+    block(below: 24pt, participant-number(num-digits))
+  }
+  // `block(below:)` gives exact spacing; a bare `v()` at the top level would
+  // add the surrounding paragraph's line leading on top of it
+  block(below: 24pt, text(size: 16pt, weight: "bold", title))
+  for (i, q) in questions.enumerate() {
+    if (i + 1) in breaks {
+      pagebreak()
+      q
+    } else {
+      block(below: 24pt, q)
+    }
   }
 }
