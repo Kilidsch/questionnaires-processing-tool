@@ -19,3 +19,4 @@ src/areaMapping.png
 test_data/
 processing_pie.py
 questionnaire_progress*
+output/

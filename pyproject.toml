@@ -5,13 +5,18 @@ description = "Script samples and UI for automatic processing of scanned surveys
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "numpy>=2.5.4",
     "opencv-contrib-python>=4.13.0.92",
     "opencv-python>=4.13.0.92",
     "packaging>=26.0",
     "pdf2image>=1.17.0",
     "pillow>=12.1.1",
+    "pydantic>=2.14.1",
+    "pymupdf>=1.28.2",
     "PyQt5>=5.15.11",
-    "PyQt5-Qt5>=5.15.18",
+    # 5.15.2 is the last PyQt5-Qt5 release with Windows wheels (>=5.15.18
+    # ships Linux/macOS only, which makes `uv sync` fail on Windows)
+    "PyQt5-Qt5==5.15.2",
     "PyQt5_sip>=12.18.0",
     "PyQtDarkTheme-fork>=2.3.6",
     "pytesseract>=0.3.13",
@@ -22,5 +27,10 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "pytest>=9.1.1",
     "ruff>=0.15.4",
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
