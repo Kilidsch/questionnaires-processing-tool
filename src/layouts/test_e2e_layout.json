@@ -4,7 +4,7 @@
   "elements": [
     {
       "page": 1,
-      "dx": 1314,
+      "dx": 1140,
       "dy": 275,
       "kind": "participant-number",
       "digits": 4,
@@ -13,7 +13,7 @@
     },
     {
       "page": 1,
-      "dx": 36,
+      "dx": -138,
       "dy": 880,
       "kind": "question",
       "num": 1,
@@ -21,7 +21,7 @@
     },
     {
       "page": 1,
-      "dx": 36,
+      "dx": -138,
       "dy": 1021,
       "kind": "checkbox",
       "question": 1,
@@ -31,7 +31,7 @@
     },
     {
       "page": 1,
-      "dx": 1104,
+      "dx": 930,
       "dy": 1021,
       "kind": "checkbox",
       "question": 1,
@@ -41,7 +41,7 @@
     },
     {
       "page": 1,
-      "dx": 2172,
+      "dx": 1997,
       "dy": 1021,
       "kind": "checkbox",
       "question": 1,
@@ -51,7 +51,7 @@
     },
     {
       "page": 1,
-      "dx": 36,
+      "dx": -138,
       "dy": 1147,
       "kind": "checkbox",
       "question": 1,
@@ -61,7 +61,7 @@
     },
     {
       "page": 1,
-      "dx": 1104,
+      "dx": 930,
       "dy": 1147,
       "kind": "checkbox",
       "question": 1,
@@ -71,7 +71,7 @@
     },
     {
       "page": 1,
-      "dx": 36,
+      "dx": -138,
       "dy": 1272,
       "kind": "freetext",
       "question": 1,
@@ -80,7 +80,7 @@
     },
     {
       "page": 1,
-      "dx": 36,
+      "dx": -138,
       "dy": 1999,
       "kind": "question",
       "num": 2,
@@ -88,7 +88,7 @@
     },
     {
       "page": 1,
-      "dx": 371,
+      "dx": 197,
       "dy": 2346,
       "kind": "checkcell",
       "question": 2,
@@ -102,7 +102,7 @@
     },
     {
       "page": 1,
-      "dx": 851,
+      "dx": 677,
       "dy": 2346,
       "kind": "checkcell",
       "question": 2,
@@ -116,7 +116,7 @@
     },
     {
       "page": 1,
-      "dx": 1331,
+      "dx": 1157,
       "dy": 2346,
       "kind": "checkcell",
       "question": 2,
@@ -130,7 +130,7 @@
     },
     {
       "page": 1,
-      "dx": 371,
+      "dx": 197,
       "dy": 2466,
       "kind": "checkcell",
       "question": 2,
@@ -144,7 +144,7 @@
     },
     {
       "page": 1,
-      "dx": 851,
+      "dx": 677,
       "dy": 2466,
       "kind": "checkcell",
       "question": 2,
@@ -158,7 +158,7 @@
     },
     {
       "page": 1,
-      "dx": 1331,
+      "dx": 1157,
       "dy": 2466,
       "kind": "checkcell",
       "question": 2,
@@ -172,7 +172,7 @@
     },
     {
       "page": 1,
-      "dx": 371,
+      "dx": 197,
       "dy": 2586,
       "kind": "checkcell",
       "question": 2,
@@ -186,7 +186,7 @@
     },
     {
       "page": 1,
-      "dx": 851,
+      "dx": 677,
       "dy": 2586,
       "kind": "checkcell",
       "question": 2,
@@ -200,7 +200,7 @@
     },
     {
       "page": 1,
-      "dx": 1331,
+      "dx": 1157,
       "dy": 2586,
       "kind": "checkcell",
       "question": 2,
@@ -214,7 +214,7 @@
     },
     {
       "page": 1,
-      "dx": 371,
+      "dx": 197,
       "dy": 2706,
       "kind": "checkcell",
       "question": 2,
@@ -228,7 +228,7 @@
     },
     {
       "page": 1,
-      "dx": 851,
+      "dx": 677,
       "dy": 2706,
       "kind": "checkcell",
       "question": 2,
@@ -242,7 +242,7 @@
     },
     {
       "page": 1,
-      "dx": 1331,
+      "dx": 1157,
       "dy": 2706,
       "kind": "checkcell",
       "question": 2,
@@ -256,7 +256,7 @@
     },
     {
       "page": 1,
-      "dx": 371,
+      "dx": 197,
       "dy": 2826,
       "kind": "checkcell",
       "question": 2,
@@ -270,7 +270,7 @@
     },
     {
       "page": 1,
-      "dx": 851,
+      "dx": 677,
       "dy": 2826,
       "kind": "checkcell",
       "question": 2,
@@ -284,7 +284,7 @@
     },
     {
       "page": 1,
-      "dx": 1331,
+      "dx": 1157,
       "dy": 2826,
       "kind": "checkcell",
       "question": 2,
@@ -298,7 +298,7 @@
     },
     {
       "page": 1,
-      "dx": 36,
+      "dx": -138,
       "dy": 3113,
       "kind": "question",
       "num": 3,
@@ -306,7 +306,7 @@
     },
     {
       "page": 1,
-      "dx": 36,
+      "dx": -138,
       "dy": 3254,
       "kind": "checkbox",
       "question": 3,
@@ -316,7 +316,7 @@
     },
     {
       "page": 1,
-      "dx": 1104,
+      "dx": 930,
       "dy": 3254,
       "kind": "checkbox",
       "question": 3,
@@ -326,7 +326,7 @@
     },
     {
       "page": 1,
-      "dx": 2172,
+      "dx": 1997,
       "dy": 3254,
       "kind": "checkbox",
       "question": 3,
@@ -336,7 +336,7 @@
     },
     {
       "page": 1,
-      "dx": 36,
+      "dx": -138,
       "dy": 3380,
       "kind": "checkbox",
       "question": 3,
@@ -346,7 +346,7 @@
     },
     {
       "page": 1,
-      "dx": 1104,
+      "dx": 930,
       "dy": 3380,
       "kind": "checkbox",
       "question": 3,
@@ -356,7 +356,7 @@
     },
     {
       "page": 1,
-      "dx": 36,
+      "dx": -138,
       "dy": 3617,
       "kind": "question",
       "num": 4,
@@ -364,7 +364,7 @@
     },
     {
       "page": 1,
-      "dx": 36,
+      "dx": -138,
       "dy": 3758,
       "kind": "freetext",
       "question": 4,
@@ -373,7 +373,7 @@
     },
     {
       "page": 1,
-      "dx": 36,
+      "dx": -138,
       "dy": 4454,
       "kind": "checkbox",
       "question": 4,
@@ -383,7 +383,7 @@
     },
     {
       "page": 2,
-      "dx": 36,
+      "dx": -138,
       "dy": 275,
       "kind": "question",
       "num": 5,
@@ -391,7 +391,7 @@
     },
     {
       "page": 2,
-      "dx": 562,
+      "dx": 388,
       "dy": 522,
       "kind": "checkcell",
       "question": 5,
@@ -405,7 +405,7 @@
     },
     {
       "page": 2,
-      "dx": 1042,
+      "dx": 868,
       "dy": 522,
       "kind": "checkcell",
       "question": 5,
@@ -419,7 +419,7 @@
     },
     {
       "page": 2,
-      "dx": 1522,
+      "dx": 1348,
       "dy": 522,
       "kind": "checkcell",
       "question": 5,
@@ -433,7 +433,7 @@
     },
     {
       "page": 2,
-      "dx": 562,
+      "dx": 388,
       "dy": 642,
       "kind": "checkcell",
       "question": 5,
@@ -447,7 +447,7 @@
     },
     {
       "page": 2,
-      "dx": 1042,
+      "dx": 868,
       "dy": 642,
       "kind": "checkcell",
       "question": 5,
@@ -461,7 +461,7 @@
     },
     {
       "page": 2,
-      "dx": 1522,
+      "dx": 1348,
       "dy": 642,
       "kind": "checkcell",
       "question": 5,
@@ -475,7 +475,7 @@
     },
     {
       "page": 2,
-      "dx": 562,
+      "dx": 388,
       "dy": 762,
       "kind": "checkcell",
       "question": 5,
@@ -489,7 +489,7 @@
     },
     {
       "page": 2,
-      "dx": 1042,
+      "dx": 868,
       "dy": 762,
       "kind": "checkcell",
       "question": 5,
@@ -503,7 +503,7 @@
     },
     {
       "page": 2,
-      "dx": 1522,
+      "dx": 1348,
       "dy": 762,
       "kind": "checkcell",
       "question": 5,
@@ -517,7 +517,7 @@
     },
     {
       "page": 2,
-      "dx": 562,
+      "dx": 388,
       "dy": 882,
       "kind": "checkcell",
       "question": 5,
@@ -531,7 +531,7 @@
     },
     {
       "page": 2,
-      "dx": 1042,
+      "dx": 868,
       "dy": 882,
       "kind": "checkcell",
       "question": 5,
@@ -545,7 +545,7 @@
     },
     {
       "page": 2,
-      "dx": 1522,
+      "dx": 1348,
       "dy": 882,
       "kind": "checkcell",
       "question": 5,
@@ -559,7 +559,7 @@
     },
     {
       "page": 2,
-      "dx": 562,
+      "dx": 388,
       "dy": 1002,
       "kind": "checkcell",
       "question": 5,
@@ -573,7 +573,7 @@
     },
     {
       "page": 2,
-      "dx": 1042,
+      "dx": 868,
       "dy": 1002,
       "kind": "checkcell",
       "question": 5,
@@ -587,7 +587,7 @@
     },
     {
       "page": 2,
-      "dx": 1522,
+      "dx": 1348,
       "dy": 1002,
       "kind": "checkcell",
       "question": 5,
@@ -601,7 +601,7 @@
     },
     {
       "page": 2,
-      "dx": 36,
+      "dx": -138,
       "dy": 1178,
       "kind": "checkbox",
       "question": 5,
@@ -611,7 +611,7 @@
     },
     {
       "page": 2,
-      "dx": 36,
+      "dx": -138,
       "dy": 1339,
       "kind": "question",
       "num": 6,
@@ -619,7 +619,7 @@
     },
     {
       "page": 2,
-      "dx": 36,
+      "dx": -138,
       "dy": 1481,
       "kind": "checkbox",
       "question": 6,
@@ -629,7 +629,7 @@
     },
     {
       "page": 2,
-      "dx": 1104,
+      "dx": 930,
       "dy": 1481,
       "kind": "checkbox",
       "question": 6,
@@ -639,7 +639,7 @@
     },
     {
       "page": 2,
-      "dx": 2172,
+      "dx": 1997,
       "dy": 1481,
       "kind": "checkbox",
       "question": 6,
@@ -649,7 +649,7 @@
     },
     {
       "page": 2,
-      "dx": 36,
+      "dx": -138,
       "dy": 1606,
       "kind": "checkbox",
       "question": 6,
@@ -659,7 +659,7 @@
     },
     {
       "page": 2,
-      "dx": 1104,
+      "dx": 930,
       "dy": 1606,
       "kind": "checkbox",
       "question": 6,

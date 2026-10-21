@@ -26,10 +26,11 @@
 // 500 dpi pixel -> Typst length
 #let px = (n) => n * 25.4mm / 500
 
-// content area matching the old forms: below the top tags, above the bottom
-// tags, horizontally the old content extent (34.6 .. 193.1 mm). The top margin
-// keeps a visible gap between the corner tags and the first line of text.
-#let page-margins = (top: 33mm, bottom: 23.9mm, left: 34.6mm, right: 16.9mm)
+// content area: below the top tags, above the bottom tags, with equal left and
+// right margins (25.75 mm each, i.e. the old 34.6/16.9 mm split evenly) so the
+// 158.5 mm content width stays the same. The top margin keeps a visible gap
+// between the corner tags and the first line of text.
+#let page-margins = (top: 33mm, bottom: 23.9mm, left: 25.75mm, right: 25.75mm)
 
 // one corner tag, centered on a page point (lengths from the page's top-left)
 #let corner-tag = (id, center) => place(top + left,
