@@ -47,13 +47,13 @@ DPI = 500
 PX_PER_PT = DPI / 72.0
 ANKER_X = 645  # top-left ArUco tag center in the deskewed space (AnkerPos.X)
 ANKER_Y = 375  # top-left ArUco tag center in the deskewed space (AnkerPos.Y)
-# Where the top-left tag is printed on the (ideal, 500 dpi) page. The tags are
-# symmetric on the page (18.97 mm gaps), i.e. 6 mm left of deskew's target, and
-# deskew() translates them onto AnkerPos. Layout exports therefore have to
-# measure dx/dy against the *printed* anchor, which is what the compiled
-# document reports; detection adds the translation via deskew().
-PRINT_ANKER_X = 527  # typst_src/lib.typ: corner-px.top-left.x
-PRINT_ANKER_Y = 375  # typst_src/lib.typ: corner-px.top-left.y
+# The *printed* top-left tag center -- the origin of every dx/dy -- is not a
+# constant here: lib.typ emits an "aruco" record per printed tag and
+# records_to_layout() reads the id-1 one. It differs from (ANKER_X, ANKER_Y)
+# because the tags are printed symmetrically on the page (18.97 mm gaps) while
+# deskew() warps them onto AnkerPos. Detection works in the AnkerPos space, the
+# layout JSON in the printed one, and the translation deskew() applies is what
+# makes the dx/dy values line up in both.
 
 # --- import of the legacy template classes --------------------------------
 _ROOT = Path(__file__).resolve().parent
@@ -161,7 +161,37 @@ class Layout(BaseModel):
     doc: str
     # total page count of the compiled PDF
     pages: int
+    # page px (500 dpi) of the printed top-left ArUco tag center: the origin
+    # every dx/dy is measured from. deskew() moves it to AnkerPos (645, 375).
+    anchor: tuple[int, int]
     elements: list[Element]
+
+
+def _anchor_from_records(records: list[dict]) -> tuple[int, int]:
+    """The printed top-left tag center in 500 dpi px, taken from the "aruco"
+    records ``lib.typ`` emits for the page-corner tags.
+
+    Those records repeat once per page (the tags are page backgrounds), so the
+    ids are collected and each must sit at exactly one position.
+    """
+    positions: dict[int, set[tuple[int, int]]] = {}
+    for rec in records:
+        v = rec["value"]
+        if v["kind"] != "aruco":
+            continue
+        px = (round(rec["x"] * PX_PER_PT), round(rec["y"] * PX_PER_PT))
+        positions.setdefault(v["id"], set()).add(px)
+
+    missing = [i for i in (1, 2, 3, 4) if i not in positions]
+    if missing:
+        raise ValueError(
+            f"no 'aruco' record for corner tag id(s) {missing}: the document must "
+            "set `background: page-corner-tags` (lib.typ) so the anchor can be read"
+        )
+    for tag_id, spots in positions.items():
+        if len(spots) > 1:
+            raise ValueError(f"corner tag {tag_id} moved between pages: {sorted(spots)}")
+    return positions[1].pop()
 
 
 # --- conversion: raw typst eval records -> Layout --------------------------
@@ -171,17 +201,22 @@ def records_to_layout(records: list[dict], doc: str, pages: int) -> Layout:
     Each record is ``{"value": {...}, "page": int, "x": pt, "y": pt}`` where
     ``x`` / ``y`` are page-absolute pt (origin = page top-left). We convert to
     500 dpi px, then to a whole-pixel offset from the *printed* top-left tag
-    anchor (``PRINT_ANKER_X`` / ``_Y``). deskew() later translates the printed
-    tags onto the detection anchor, so the offsets line up in both spaces.
+    anchor, which is read from the document's own "aruco" records (deskew()
+    later translates those tags onto the detection anchor, so the offsets line
+    up in both spaces).
     """
+    anchor_x, anchor_y = _anchor_from_records(records)
     elements = []
     for rec in records:
         v = rec["value"]
         kind = v["kind"]
+        if kind == "aruco":
+            # the tags themselves: only used for the anchor above
+            continue
         # round the absolute position to the nearest pixel, then take the
         # offset from the anchor (the anchor is exactly on a pixel).
-        dx = round(rec["x"] * PX_PER_PT) - PRINT_ANKER_X
-        dy = round(rec["y"] * PX_PER_PT) - PRINT_ANKER_Y
+        dx = round(rec["x"] * PX_PER_PT) - anchor_x
+        dy = round(rec["y"] * PX_PER_PT) - anchor_y
         base = {"kind": kind, "page": rec["page"], "dx": dx, "dy": dy}
 
         if kind == "checkbox":
@@ -220,7 +255,9 @@ def records_to_layout(records: list[dict], doc: str, pages: int) -> Layout:
 
         elements.append(base)
 
-    return Layout(doc=doc, pages=pages, elements=elements)
+    return Layout(
+        doc=doc, pages=pages, anchor=(anchor_x, anchor_y), elements=elements
+    )
 
 
 def load_layout(path: str | Path) -> Layout:

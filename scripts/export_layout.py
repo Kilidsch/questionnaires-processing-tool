@@ -2,10 +2,11 @@
 
 Compiles the given .typ file to a PDF, extracts every element's metadata via
 `typst eval` (see README, "Layout-based questionnaires"), converts the
-page-absolute pt positions to the deskewed 500 dpi px space
-(x_px = x_pt * 500/72) and then to the legacy (dx, dy) offsets from the
-top-left tag anchor (645, 375), and writes the result to
-output/<stem>_layout.json.
+page-absolute pt positions to 500 dpi px (x_px = x_pt * 500/72) and then to
+the legacy (dx, dy) offsets from the printed top-left ArUco tag anchor, and
+writes the result to output/<stem>_layout.json. The anchor itself is read from
+the document: lib.typ emits an "aruco" record at each tag centre, and the
+top-left one is stored in the JSON as "anchor" (px).
 
 The JSON validates against the Pydantic schema in src/questionnaire_layout.py
 (Layout) and can be turned back into a legacy Template with

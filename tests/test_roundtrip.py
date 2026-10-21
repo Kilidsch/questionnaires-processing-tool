@@ -46,6 +46,8 @@ def test_json_shape(exported):
     data = exported["raw"]
     assert data["doc"] == "test_multipage.typ"
     assert data["pages"] == approx(2)
+    # the printed ArUco anchor (origin of dx/dy), read from the "aruco" records
+    assert data["anchor"] == [527, 375]
     assert len(data["elements"]) == approx(93)
 
 

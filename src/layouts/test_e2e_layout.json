@@ -1,6 +1,10 @@
 {
   "doc": "test_e2e.typ",
   "pages": 2,
+  "anchor": [
+    527,
+    375
+  ],
   "elements": [
     {
       "page": 1,

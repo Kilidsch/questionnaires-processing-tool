@@ -65,12 +65,14 @@ def detection():
     doc.close()
 
     # 3. draw synthetic pen marks at the extracted positions. The layout stores
-    # offsets from the *printed* tag anchor; parse_single_data deskews the page
-    # afterwards, which translates the printed tags onto AnkerPos.
+    # offsets from the printed tag anchor (exported from the document itself);
+    # parse_single_data deskews the page afterwards, which translates the
+    # printed tags onto AnkerPos.
+    anchor_x, anchor_y = layout.anchor
     for e in layout.elements:
         img = imgs[e.page - 1]
-        left = ql.PRINT_ANKER_X + e.dx
-        top = ql.PRINT_ANKER_Y + e.dy
+        left = anchor_x + e.dx
+        top = anchor_y + e.dy
         if e.kind == "checkbox" and (e.question, e.text) in FILLED_CHECKBOXES:
             # black dot inside the 60x70 box (the detector crops top:top+70, left:left+60)
             cv2.circle(img, (left + 30, top + 35), 22, (0, 0, 0), -1)

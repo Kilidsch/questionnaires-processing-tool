@@ -16,8 +16,9 @@
 // target 645/3725) so that the printed tags are symmetric on the page: the
 // pair's spread must stay 3080 px (otherwise deskew() would rescale the scan),
 // and 527/3607 is the only placement with equal gaps to the page edges
-// (18.97 mm each). deskew() maps these centers onto (645, 375) etc., so the
-// export anchor is PRINT_ANKER_X (527), not ANKER_X (645).
+// (18.97 mm each). deskew() maps these centers onto (645, 375) etc., and
+// `corner-tag` emits each center as an "aruco" record, so the export measures
+// dx/dy from the document's own printed anchor instead of a Python constant.
 #let corner-px = (
   top-left: (x: 527, y: 375),
   top-right: (x: 3607, y: 375),
@@ -30,34 +31,6 @@
 
 // 500 dpi pixel -> Typst length
 #let px = (n) => n * 25.4mm / 500
-
-// content area: below the top tags, above the bottom tags, with equal left and
-// right margins (25.75 mm each, i.e. the old 34.6/16.9 mm split evenly) so the
-// 158.5 mm content width stays the same. The top margin keeps a visible gap
-// between the corner tags and the first line of text.
-#let page-margins = (top: 33mm, bottom: 23.9mm, left: 25.75mm, right: 25.75mm)
-
-// one corner tag, centered on a page point (lengths from the page's top-left)
-#let corner-tag = (id, center) => place(top + left,
-  dx: px(center.x) - tag-size / 2,
-  dy: px(center.y) - tag-size / 2,
-  image("assets/aruco-" + str(id) + ".png", width: tag-size, scaling: "pixelated"),
-)
-
-// the four page-corner tags at their fixed centers.
-//
-// Pass this as `background:` to `set page`. The background is laid out over
-// the full physical page (margins included) on every page, which is the
-// supported way to decorate pages with auto-paginated content (`#show page`
-// does not exist in Typst). The tags are fixed in id and position on every
-// page: deskew() requires exactly ids 1, 4, 3, 2 at the centers above, so
-// they must NOT depend on the page number.
-#let page-corner-tags = {
-  corner-tag(1, corner-px.top-left)
-  corner-tag(4, corner-px.top-right)
-  corner-tag(3, corner-px.bottom-right)
-  corner-tag(2, corner-px.bottom-left)
-}
 
 // Attach element data as metadata, pinned by the caller to the element's
 // top-left corner via `place(top + left, emit(...))`.
@@ -75,6 +48,42 @@
 //                 x: it.location().position().x.pt(),
 //                 y: it.location().position().y.pt()))' --in doc.typ
 #let emit = (kind, data) => metadata((kind: kind, ..data))
+
+// content area: below the top tags, above the bottom tags, with equal left and
+// right margins (25.75 mm each, i.e. the old 34.6/16.9 mm split evenly) so the
+// 158.5 mm content width stays the same. The top margin keeps a visible gap
+// between the corner tags and the first line of text.
+#let page-margins = (top: 33mm, bottom: 23.9mm, left: 25.75mm, right: 25.75mm)
+
+// one corner tag, centered on a page point (lengths from the page's top-left).
+// Also emits an "aruco" record at the tag's center, so the export script can
+// read the printed anchor from the document instead of hard-coding it (the
+// anchor is the origin every dx/dy is measured from).
+#let corner-tag = (id, center) => {
+  place(top + left,
+    dx: px(center.x) - tag-size / 2,
+    dy: px(center.y) - tag-size / 2,
+    image("assets/aruco-" + str(id) + ".png", width: tag-size, scaling: "pixelated"),
+  )
+  place(top + left, dx: px(center.x), dy: px(center.y),
+    emit("aruco", (id: id, size: tag-size / 1pt)),
+  )
+}
+
+// the four page-corner tags at their fixed centers.
+//
+// Pass this as `background:` to `set page`. The background is laid out over
+// the full physical page (margins included) on every page, which is the
+// supported way to decorate pages with auto-paginated content (`#show page`
+// does not exist in Typst). The tags are fixed in id and position on every
+// page: deskew() requires exactly ids 1, 4, 3, 2 at the centers above, so
+// they must NOT depend on the page number.
+#let page-corner-tags = {
+  corner-tag(1, corner-px.top-left)
+  corner-tag(4, corner-px.top-right)
+  corner-tag(3, corner-px.bottom-right)
+  corner-tag(2, corner-px.bottom-left)
+}
 
 // a 60×70 px checkbox (deskewed space) with a label to its right
 #let checkbox = (label, question: none) => {

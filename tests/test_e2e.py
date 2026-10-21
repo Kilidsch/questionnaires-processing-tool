@@ -51,6 +51,10 @@ def test_json_shape(exported):
     data = exported["raw"]
     assert data["doc"] == "test_e2e.typ"
     assert data["pages"] == approx(2)
+    # the origin of every dx/dy, exported from the document's ArUco records
+    # (printed symmetrically, 18.97 mm from the page edges)
+    assert data["anchor"] == [527, 375]
+    assert exported["layout"].anchor == (527, 375)
     assert len(data["elements"]) == approx(56)
 
 
