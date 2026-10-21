@@ -45,8 +45,15 @@ from pydantic import BaseModel, ConfigDict, Field
 # --- coordinate constants (must match deskew() in the processing tool) -----
 DPI = 500
 PX_PER_PT = DPI / 72.0
-ANKER_X = 645  # top-left ArUco tag center, px (AnkerPos.X)
-ANKER_Y = 375  # top-left ArUco tag center, px (AnkerPos.Y)
+ANKER_X = 645  # top-left ArUco tag center in the deskewed space (AnkerPos.X)
+ANKER_Y = 375  # top-left ArUco tag center in the deskewed space (AnkerPos.Y)
+# Where the top-left tag is printed on the (ideal, 500 dpi) page. The tags are
+# symmetric on the page (18.97 mm gaps), i.e. 6 mm left of deskew's target, and
+# deskew() translates them onto AnkerPos. Layout exports therefore have to
+# measure dx/dy against the *printed* anchor, which is what the compiled
+# document reports; detection adds the translation via deskew().
+PRINT_ANKER_X = 527  # typst_src/lib.typ: corner-px.top-left.x
+PRINT_ANKER_Y = 375  # typst_src/lib.typ: corner-px.top-left.y
 
 # --- import of the legacy template classes --------------------------------
 _ROOT = Path(__file__).resolve().parent
@@ -163,7 +170,9 @@ def records_to_layout(records: list[dict], doc: str, pages: int) -> Layout:
 
     Each record is ``{"value": {...}, "page": int, "x": pt, "y": pt}`` where
     ``x`` / ``y`` are page-absolute pt (origin = page top-left). We convert to
-    deskewed px, then to a whole-pixel offset from the top-left tag anchor.
+    500 dpi px, then to a whole-pixel offset from the *printed* top-left tag
+    anchor (``PRINT_ANKER_X`` / ``_Y``). deskew() later translates the printed
+    tags onto the detection anchor, so the offsets line up in both spaces.
     """
     elements = []
     for rec in records:
@@ -171,8 +180,8 @@ def records_to_layout(records: list[dict], doc: str, pages: int) -> Layout:
         kind = v["kind"]
         # round the absolute position to the nearest pixel, then take the
         # offset from the anchor (the anchor is exactly on a pixel).
-        dx = round(rec["x"] * PX_PER_PT) - ANKER_X
-        dy = round(rec["y"] * PX_PER_PT) - ANKER_Y
+        dx = round(rec["x"] * PX_PER_PT) - PRINT_ANKER_X
+        dy = round(rec["y"] * PX_PER_PT) - PRINT_ANKER_Y
         base = {"kind": kind, "page": rec["page"], "dx": dx, "dy": dy}
 
         if kind == "checkbox":

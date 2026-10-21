@@ -154,7 +154,7 @@ def test_participant_number(exported):
     assert pn.h == approx(200, abs=1)
     # the row is centered horizontally on the page (158.5 mm content area,
     # equal 25.75 mm left/right margins)
-    assert pn.dx == approx(1140, abs=2)
+    assert pn.dx == approx(1258, abs=2)
 
     area = exported["template"].get_participant_number()
     assert area is not None
@@ -260,27 +260,27 @@ def test_positions_are_sane(exported):
     elements = exported["layout"].elements
 
     # known spots (measured with the ID row, 33 mm top margin, equal 25.75 mm
-    # left/right margins and the grid layout). The text block starts left of
-    # the top-left corner tag's center, hence the negative dx.
+    # left/right margins and the grid layout). dx is relative to the printed
+    # top-left tag (527 px), so the text edge sits just left of it.
     ja = next(e for e in elements if e.kind == "checkbox" and e.text == "sehr gut")
-    assert ja.dx == approx(-138, abs=2)
+    assert ja.dx == approx(-20, abs=2)
     assert ja.dy == approx(1021, abs=2)
     last = next(e for e in elements if e.kind == "checkbox" and e.text == "sehr anstrengend")
-    assert last.dx == approx(930, abs=2)  # second of three grid columns
+    assert last.dx == approx(1048, abs=2)  # second of three grid columns
     assert last.dy == approx(1606, abs=2)
 
     # table anchors (dx of column 0, dy of row 0)
     q2 = next(e for e in elements if e.kind == "checkcell"
               and e.question == 2 and e.row == 0 and e.col == 0)
-    assert q2.dx == approx(197, abs=2)
+    assert q2.dx == approx(315, abs=2)
     assert q2.dy == approx(2346, abs=2)
     q5 = next(e for e in elements if e.kind == "checkcell"
               and e.question == 5 and e.row == 0 and e.col == 0)
-    assert q5.dx == approx(388, abs=2)
+    assert q5.dx == approx(506, abs=2)
     assert q5.dy == approx(522, abs=2)
 
     # every element lands inside the deskewed page (A4 @ 500 dpi = 4134x5847;
-    # dx may be negative: the content area starts left of the top-left tag)
+    # dx may be slightly negative: the text edge is a bit left of the tag)
     for e in elements:
         assert -200 <= e.dx <= 3500
         assert -10 <= e.dy <= 5200

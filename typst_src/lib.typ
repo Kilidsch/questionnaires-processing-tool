@@ -12,12 +12,17 @@
 //     absolute page px = (645 + dx, 375 + dy).
 // - Conversion: 1 px = 25.4 / 500 mm, i.e. 1 pt = 500 / 72 px.
 
-// centers of the page-corner tags in 500 dpi px (must match deskew())
+// centers of the page-corner tags in 500 dpi px. 527/3607 (not deskew's
+// target 645/3725) so that the printed tags are symmetric on the page: the
+// pair's spread must stay 3080 px (otherwise deskew() would rescale the scan),
+// and 527/3607 is the only placement with equal gaps to the page edges
+// (18.97 mm each). deskew() maps these centers onto (645, 375) etc., so the
+// export anchor is PRINT_ANKER_X (527), not ANKER_X (645).
 #let corner-px = (
-  top-left: (x: 645, y: 375),
-  top-right: (x: 3725, y: 375),
-  bottom-left: (x: 645, y: 5530),
-  bottom-right: (x: 3725, y: 5530),
+  top-left: (x: 527, y: 375),
+  top-right: (x: 3607, y: 375),
+  bottom-left: (x: 527, y: 5530),
+  bottom-right: (x: 3607, y: 5530),
 )
 
 // printed size of a corner tag (the body figure's tags measure ~15.6 mm)

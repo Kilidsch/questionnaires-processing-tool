@@ -130,18 +130,18 @@ def test_template_structure(exported):
 def test_positions_are_sane(exported):
     elements = exported["layout"].elements
 
-    # a known checkbox: q1 "ja" sits at the left text edge (dx=-138, i.e. the
-    # 25.75 mm left margin); dy shifted with the 33 mm top margin (it was 556
-    # with the old 28 mm margin)
+    # a known checkbox: q1 "ja" sits at the left text edge (dx=-20, i.e. the
+    # 25.75 mm left margin, just left of the printed top-left tag center); dy
+    # shifted with the 33 mm top margin (it was 556 with the old 28 mm margin)
     ja = next(e for e in elements if e.kind == "checkbox" and e.text == "ja")
-    assert ja.dx == approx(-138, abs=2)
+    assert ja.dx == approx(-20, abs=2)
     assert ja.dy == approx(655, abs=2)
     assert ja.w == approx(60, abs=1)
     assert ja.h == approx(70, abs=1)
 
     # every element lands inside the deskewed page (A4 @ 500 dpi = 4134x5847)
     # (bounds check, so plain comparisons -- approx only supports ==);
-    # dx may be negative: the content area starts left of the top-left tag
+    # dx may be slightly negative: the text edge is a bit left of the tag
     for e in elements:
         assert -200 <= e.dx <= 3500
         assert -10 <= e.dy <= 5200
