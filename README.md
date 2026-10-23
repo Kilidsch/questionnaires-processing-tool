@@ -111,8 +111,10 @@ Two documents live in the repo:
 )
 ```
 
-   `template()` adds the centered "ID" header row (four digit boxes) above the
-   title by default; pass `num-digits: 0` to omit it. Several elements of one
+   `template()` adds the centered "ID" header row (four digit boxes) in the
+   top page margin, above the title, by default; it is placed outside the
+   content flow (no space is taken from the questions), and `num-digits: 0`
+   omits it. Several elements of one
    question go into one `stack(...)`; `template()` takes the array of
    `question(...)` calls.
 
@@ -152,7 +154,11 @@ Two documents live in the repo:
   Bottleneck-specific case).
 - **The "ID" row is on by default** (`num-digits: 4` in `template(...)`). The
   participant writes one digit per box; the number itself is typed into the
-  GUI, which shows that area as the participant number.
+  GUI, which shows that area as the participant number. The row sits in the
+  top page margin, vertically centered on the corner-tag band (it is narrow
+  and centered, so it cannot overlap the tags), and takes no content space.
+  Its layout `dy` is therefore negative: it starts above the printed tag
+  centre that defines the dx/dy origin.
 - **Page breaks:** list the questions that start a new page in `breaks:`
   rather than sizing elements until they overflow. Each `checktable` must
   still fit on its page.
