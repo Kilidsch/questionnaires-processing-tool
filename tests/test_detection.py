@@ -177,14 +177,16 @@ def test_freetext_crops_written(detection):
 
 def test_participant_number_area(detection):
     """The ID box row is exposed as the legacy participant-number area:
-    it must cover the row of digit boxes on page 1, inside the page bounds."""
+    it must cover the row of digit boxes on page 1, inside the page bounds.
+    The row sits in the top page margin (centred on the corner tags), so its
+    dy is negative -- it starts above the printed top-left tag centre."""
     pn = detection["template"].get_participant_number()
     assert pn is not None
     assert pn.page == approx(1)
     assert pn.size_x == approx(660, abs=1)
     assert pn.size_y == approx(200, abs=1)
-    # inside the deskewed page, below the top tag
+    # kept clear of the page edge but above the dx/dy origin
+    assert -200 <= pn.dy <= 0
     assert 0 <= pn.dx
-    assert 0 <= pn.dy
     assert pn.dx + pn.size_x <= 3500
     assert pn.dy + pn.size_y <= 5200

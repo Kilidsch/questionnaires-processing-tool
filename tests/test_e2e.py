@@ -157,8 +157,10 @@ def test_participant_number(exported):
     assert pn.w == approx(660, abs=1)
     assert pn.h == approx(200, abs=1)
     # the row is centered horizontally on the page (158.5 mm content area,
-    # equal 25.75 mm left/right margins)
+    # equal 25.75 mm left/right margins) and sits in the top margin, so its
+    # dy is negative (above the printed tag centre, the dx/dy origin)
     assert pn.dx == approx(1258, abs=2)
+    assert pn.dy == approx(-100, abs=2)
 
     area = exported["template"].get_participant_number()
     assert area is not None
@@ -246,8 +248,9 @@ def test_each_checktable_on_single_page(exported):
 
 def test_questions_map_to_one_page_each(exported):
     """In this layout every question's elements land on a single page and the
-    questions are in order: Q1-Q4 on page 1, Q5-Q6 on page 2 (the Nummer
-    header row shifts the page-1 content down but must not change the break)."""
+    questions are in order: Q1-Q4 on page 1, Q5-Q6 on page 2 (the Nummer row
+    lives in the top margin and does not take content space, so the break
+    comes from `breaks: (5,)` alone)."""
     layout = exported["layout"]
 
     def element_pages(qnum):
@@ -268,7 +271,7 @@ def test_positions_are_sane(exported):
     # top-left tag (527 px), so the text edge sits just left of it.
     ja = next(e for e in elements if e.kind == "checkbox" and e.text == "sehr gut")
     assert ja.dx == approx(-20, abs=2)
-    assert ja.dy == approx(1021, abs=2)
+    assert ja.dy == approx(655, abs=2)
     last = next(e for e in elements if e.kind == "checkbox" and e.text == "sehr anstrengend")
     assert last.dx == approx(1048, abs=2)  # second of three grid columns
     assert last.dy == approx(1606, abs=2)
@@ -277,14 +280,16 @@ def test_positions_are_sane(exported):
     q2 = next(e for e in elements if e.kind == "checkcell"
               and e.question == 2 and e.row == 0 and e.col == 0)
     assert q2.dx == approx(315, abs=2)
-    assert q2.dy == approx(2346, abs=2)
+    assert q2.dy == approx(1980, abs=2)
     q5 = next(e for e in elements if e.kind == "checkcell"
               and e.question == 5 and e.row == 0 and e.col == 0)
     assert q5.dx == approx(506, abs=2)
     assert q5.dy == approx(522, abs=2)
 
     # every element lands inside the deskewed page (A4 @ 500 dpi = 4134x5847;
-    # dx may be slightly negative: the text edge is a bit left of the tag)
+    # dx may be slightly negative: the text edge is a bit left of the tag).
+    # dy goes negative for the participant-number row, which sits in the top
+    # margin, above the top-left tag centre that defines dy = 0.
     for e in elements:
         assert -200 <= e.dx <= 3500
-        assert -10 <= e.dy <= 5200
+        assert -200 <= e.dy <= 5200

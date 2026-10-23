@@ -242,10 +242,18 @@
 // box and sized to the full row of boxes (label excluded). The annotation GUI
 // shows that area so the number can be typed in; the detector itself ignores
 // it (the digit boxes are not part of the automatic extraction).
+//
+// The row is placed in the top page margin by `template()` (vertically centred
+// on the corner tags), so its dy is negative: it starts above the printed
+// top-left tag centre, which is the dx/dy origin.
+#let participant-box-w = px(150)
+#let participant-box-h = px(200)
+#let participant-box-gutter = px(20)
+
 #let participant-number = (n) => {
-  let w = px(150)
-  let h = px(200)
-  let gutter = px(20)
+  let w = participant-box-w
+  let h = participant-box-h
+  let gutter = participant-box-gutter
   let row-w = w * n + gutter * (n - 1)
   let cells = (text(size: 11pt, "ID"),)
   for i in range(0, n) {
@@ -272,8 +280,13 @@
 // `questions` is an array of content (each entry a question(...) call).
 //
 // `num-digits` > 0 puts the participant-number row ("ID" + one box per digit)
-// above the title; it is on by default, forms that predate it pass
-// `num-digits: 0`.
+// in the top page margin, vertically centred on the corner-tag band: it is on
+// by default, forms that predate it pass `num-digits: 0`.
+//
+// The row is placed outside the flow on purpose. It is narrow and centred, so
+// it fits beside the tags (no overlap), and not occupying the content column
+// frees its height plus the 24pt gap below it for the questions. Its dy is
+// therefore negative (it starts above the dx/dy origin, the tag centre).
 //
 // `breaks` lists question numbers that start a new page, e.g. `breaks: (5,)`
 // (use it instead of sizing elements to force a break). The content is
@@ -281,7 +294,11 @@
 // `pagebreak()` inside a container.
 #let template = (title, questions, num-digits: 4, breaks: ()) => {
   if num-digits > 0 {
-    block(below: 24pt, participant-number(num-digits))
+    place(
+      top,
+      dy: px(corner-px.top-left.y) - participant-box-h / 2 - page-margins.top,
+      participant-number(num-digits),
+    )
   }
   // `block(below:)` gives exact spacing; a bare `v()` at the top level would
   // add the surrounding paragraph's line leading on top of it

@@ -9,7 +9,7 @@
     {
       "page": 1,
       "dx": 1258,
-      "dy": 275,
+      "dy": -100,
       "kind": "participant-number",
       "digits": 4,
       "w": 660,
@@ -18,7 +18,7 @@
     {
       "page": 1,
       "dx": -20,
-      "dy": 880,
+      "dy": 513,
       "kind": "question",
       "num": 1,
       "text": "Wie haben Sie die Übung insgesamt bewertet?"
@@ -26,7 +26,7 @@
     {
       "page": 1,
       "dx": -20,
-      "dy": 1021,
+      "dy": 655,
       "kind": "checkbox",
       "question": 1,
       "text": "sehr gut",
@@ -36,7 +36,7 @@
     {
       "page": 1,
       "dx": 1048,
-      "dy": 1021,
+      "dy": 655,
       "kind": "checkbox",
       "question": 1,
       "text": "gut",
@@ -46,7 +46,7 @@
     {
       "page": 1,
       "dx": 2115,
-      "dy": 1021,
+      "dy": 655,
       "kind": "checkbox",
       "question": 1,
       "text": "eher schlecht",
@@ -56,7 +56,7 @@
     {
       "page": 1,
       "dx": -20,
-      "dy": 1147,
+      "dy": 780,
       "kind": "checkbox",
       "question": 1,
       "text": "schlecht",
@@ -66,7 +66,7 @@
     {
       "page": 1,
       "dx": 1048,
-      "dy": 1147,
+      "dy": 780,
       "kind": "checkbox",
       "question": 1,
       "text": "weiß nicht",
@@ -76,7 +76,7 @@
     {
       "page": 1,
       "dx": -20,
-      "dy": 1272,
+      "dy": 906,
       "kind": "freetext",
       "question": 1,
       "w": 1600,
@@ -85,7 +85,7 @@
     {
       "page": 1,
       "dx": -20,
-      "dy": 1999,
+      "dy": 1632,
       "kind": "question",
       "num": 2,
       "text": "Welche Tätigkeiten haben Sie während der Übung ausgeführt?"
@@ -93,7 +93,7 @@
     {
       "page": 1,
       "dx": 315,
-      "dy": 2346,
+      "dy": 1980,
       "kind": "checkcell",
       "question": 2,
       "table": 1,
@@ -107,7 +107,7 @@
     {
       "page": 1,
       "dx": 795,
-      "dy": 2346,
+      "dy": 1980,
       "kind": "checkcell",
       "question": 2,
       "table": 1,
@@ -121,7 +121,7 @@
     {
       "page": 1,
       "dx": 1275,
-      "dy": 2346,
+      "dy": 1980,
       "kind": "checkcell",
       "question": 2,
       "table": 1,
@@ -135,7 +135,7 @@
     {
       "page": 1,
       "dx": 315,
-      "dy": 2466,
+      "dy": 2100,
       "kind": "checkcell",
       "question": 2,
       "table": 1,
@@ -149,7 +149,7 @@
     {
       "page": 1,
       "dx": 795,
-      "dy": 2466,
+      "dy": 2100,
       "kind": "checkcell",
       "question": 2,
       "table": 1,
@@ -163,7 +163,7 @@
     {
       "page": 1,
       "dx": 1275,
-      "dy": 2466,
+      "dy": 2100,
       "kind": "checkcell",
       "question": 2,
       "table": 1,
@@ -177,7 +177,7 @@
     {
       "page": 1,
       "dx": 315,
-      "dy": 2586,
+      "dy": 2220,
       "kind": "checkcell",
       "question": 2,
       "table": 1,
@@ -191,7 +191,7 @@
     {
       "page": 1,
       "dx": 795,
-      "dy": 2586,
+      "dy": 2220,
       "kind": "checkcell",
       "question": 2,
       "table": 1,
@@ -205,7 +205,7 @@
     {
       "page": 1,
       "dx": 1275,
-      "dy": 2586,
+      "dy": 2220,
       "kind": "checkcell",
       "question": 2,
       "table": 1,
@@ -219,7 +219,7 @@
     {
       "page": 1,
       "dx": 315,
-      "dy": 2706,
+      "dy": 2340,
       "kind": "checkcell",
       "question": 2,
       "table": 1,
@@ -233,7 +233,7 @@
     {
       "page": 1,
       "dx": 795,
-      "dy": 2706,
+      "dy": 2340,
       "kind": "checkcell",
       "question": 2,
       "table": 1,
@@ -247,7 +247,7 @@
     {
       "page": 1,
       "dx": 1275,
-      "dy": 2706,
+      "dy": 2340,
       "kind": "checkcell",
       "question": 2,
       "table": 1,
@@ -261,7 +261,7 @@
     {
       "page": 1,
       "dx": 315,
-      "dy": 2826,
+      "dy": 2460,
       "kind": "checkcell",
       "question": 2,
       "table": 1,
@@ -275,7 +275,7 @@
     {
       "page": 1,
       "dx": 795,
-      "dy": 2826,
+      "dy": 2460,
       "kind": "checkcell",
       "question": 2,
       "table": 1,
@@ -289,7 +289,7 @@
     {
       "page": 1,
       "dx": 1275,
-      "dy": 2826,
+      "dy": 2460,
       "kind": "checkcell",
       "question": 2,
       "table": 1,
@@ -303,7 +303,7 @@
     {
       "page": 1,
       "dx": -20,
-      "dy": 3113,
+      "dy": 2746,
       "kind": "question",
       "num": 3,
       "text": "Wie oft sind Sie während der Übung angehalten worden?"
@@ -311,7 +311,7 @@
     {
       "page": 1,
       "dx": -20,
-      "dy": 3254,
+      "dy": 2888,
       "kind": "checkbox",
       "question": 3,
       "text": "nie",
@@ -321,7 +321,7 @@
     {
       "page": 1,
       "dx": 1048,
-      "dy": 3254,
+      "dy": 2888,
       "kind": "checkbox",
       "question": 3,
       "text": "einmal",
@@ -331,7 +331,7 @@
     {
       "page": 1,
       "dx": 2115,
-      "dy": 3254,
+      "dy": 2888,
       "kind": "checkbox",
       "question": 3,
       "text": "zweimal",
@@ -341,7 +341,7 @@
     {
       "page": 1,
       "dx": -20,
-      "dy": 3380,
+      "dy": 3013,
       "kind": "checkbox",
       "question": 3,
       "text": "dreimal",
@@ -351,7 +351,7 @@
     {
       "page": 1,
       "dx": 1048,
-      "dy": 3380,
+      "dy": 3013,
       "kind": "checkbox",
       "question": 3,
       "text": "öfter als dreimal",
@@ -361,7 +361,7 @@
     {
       "page": 1,
       "dx": -20,
-      "dy": 3617,
+      "dy": 3250,
       "kind": "question",
       "num": 4,
       "text": "Was ist Ihnen während der Übung besonders aufgefallen?"
@@ -369,7 +369,7 @@
     {
       "page": 1,
       "dx": -20,
-      "dy": 3758,
+      "dy": 3392,
       "kind": "freetext",
       "question": 4,
       "w": 2800,
@@ -378,7 +378,7 @@
     {
       "page": 1,
       "dx": -20,
-      "dy": 4454,
+      "dy": 4087,
       "kind": "checkbox",
       "question": 4,
       "text": "Nichts ist aufgefallen",
