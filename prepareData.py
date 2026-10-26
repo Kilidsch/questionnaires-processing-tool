@@ -26,6 +26,7 @@ import json
 import os.path
 from pathlib import Path
 import platform
+import shutil
 
 from pdf2image import convert_from_path
 
@@ -33,6 +34,9 @@ if platform.system() == "Windows":
     # Some additional downloading and setup
     # Check installation guide for pdf2image: https://pypi.org/project/pdf2image/
     path_to_poppler_exe = Path(r"C:/poppler/poppler-25.12.0/Library\bin")
+    if not path_to_poppler_exe.is_dir():
+        # no local install at the path above: let pdf2image search PATH
+        path_to_poppler_exe = None
 
 # ----- project includes
 from src.survey_templates import GrabExperiment, ExperimentTypes
@@ -75,8 +79,15 @@ class pdfConverter:
 
     def convert_pages(self, path_to_pdf: str):
         if os.path.isdir(self.tempDir):
-            print("Found /temp. Assuming PDF(s) already converted.")
-            return
+            converted = [
+                f for f in os.listdir(self.tempDir) if f.endswith("." + self.imgType)
+            ]
+            if converted:
+                print("Found /temp. Assuming PDF(s) already converted.")
+                return
+            # A previous run failed before sorting: keep no stale empty /temp,
+            # otherwise the pages would never be converted.
+            shutil.rmtree(self.tempDir)
         os.mkdir(self.tempDir)
         print(f"Converting {path_to_pdf} to images ... ")
         pdf_file = Path(path_to_pdf)
@@ -106,7 +117,7 @@ class pdfConverter:
         # if not given in metadata, check first page and determine type
         experimentType = self.metadata["Experiment"]["Type"]
         if experimentType not in ExperimentTypes:
-            RuntimeError(
+            raise RuntimeError(
                 f"Unknown experiment type {experimentType}. Trying to determine type from data ..."
             )
             # TODO determine type with data
@@ -152,7 +163,9 @@ class pdfConverter:
             pathToFile = os.path.join(self.tempDir, file_name)
             if os.path.isfile(pathToFile):
                 pageName = f"page-{(surveyPage+1):03}." + self.imgType
-                os.rename(pathToFile, os.path.join(currDir, pageName))
+                # replace: a re-run of prepareData must overwrite the pages of
+                # an earlier run instead of failing on the existing files
+                os.replace(pathToFile, os.path.join(currDir, pageName))
                 files.append(pageName)
             else:
                 raise RuntimeError(
@@ -209,8 +222,12 @@ class pdfConverter:
                 if img.endswith("diagramm.jpg"):
                     imgPath = os.path.join(dir, img)
                     break
-            if imgPath == "":
+            if imgPath != "":
                 break
+        if imgPath == "":
+            # layout-based forms need not contain a body diagram
+            print("No diagram found, skipping diagram masks.")
+            return
         area_grabbing.create_diagram_masks(imgPath)
 
 
@@ -246,7 +263,8 @@ def main():
         outputDir = os.path.join(expDir, pdfBaseName)
         os.makedirs(outputDir, exist_ok=True)
 
-        # Write metadata with the correct experiment type
+        # Write metadata with the correct experiment type, keeping whatever an
+        # earlier run or the user already put there (surveyResponses, statuses)
         metadataFile = os.path.join(outputDir, "metadata.json")
         metadata = {
             "Experiment": {"Type": expType, "Name": ""},
@@ -254,7 +272,12 @@ def main():
             "Date": "",
             "Comment": "",
         }
-        with open(metadataFile, "w") as f:
+        if os.path.isfile(metadataFile):
+            with open(metadataFile, encoding="utf-8") as f:
+                metadata.update(json.load(f))
+            metadata.setdefault("Experiment", {})
+            metadata["Experiment"]["Type"] = expType
+        with open(metadataFile, "w", encoding="utf-8") as f:
             json.dump(metadata, f, indent=4)
 
         converter = pdfConverter(mainDir=outputDir, metadataFile=metadataFile)
