@@ -11,12 +11,12 @@ from typing import Sequence
 
 
 class ExperimentTypes(StrEnum):
+    # hardcoded legacy forms only; layout (JSON)-based forms need no entry here,
+    # see GrabExperiment.initType and the README
     ROPE = "rope"
     BOTTLENECK = "bottleneck"
     # Rope sessions that used only the two contact pages of the Bottleneck form
     ROPE_SHORT = "rope_short"
-    # first Typst/layout-based questionnaire (src/layouts/*.json); see README
-    TEST_E2E = "test_e2e"
 
     @classmethod
     def _missing_(cls, value):
@@ -543,7 +543,8 @@ class Rope(Template):
 
 class RopeShort(Template):
     """Form used in some Rope sessions instead of the Rope form: only the two contact pages (pages 5 and 6)
-    of the Bottleneck form, so the questions and positions are those of Bottleneck questions 17-19 on pages 1-2."""
+    of the Bottleneck form, so the questions and positions are those of Bottleneck questions 17-19 on pages 1-2.
+    """
 
     first_page = 5  # page of the Bottleneck form that is page 1 here
     # these scans are darker: empty checkboxes are ~25% non-background, ticked ones ~35-65%
@@ -552,11 +553,21 @@ class RopeShort(Template):
     def __init__(self) -> None:
         self.questions = []
         for question in Bottleneck().get_questions():
-            elements = [*question.checkboxes, *question.texts, *question.diagramms, *question.tables]
+            elements = [
+                *question.checkboxes,
+                *question.texts,
+                *question.diagramms,
+                *question.tables,
+            ]
             if not elements or min(e.page for e in elements) < self.first_page:
                 continue
             question = copy.deepcopy(question)
-            for e in [*question.checkboxes, *question.texts, *question.diagramms, *question.tables]:
+            for e in [
+                *question.checkboxes,
+                *question.texts,
+                *question.diagramms,
+                *question.tables,
+            ]:
                 e.page -= self.first_page - 1
             self.questions.append(question)
 
@@ -572,31 +583,73 @@ class RopeShort(Template):
 
 
 class GrabExperiment:
-    # layout (JSON)-based questionnaires: type -> layout file
-    _layout_files = {
-        ExperimentTypes.TEST_E2E:
-            Path(__file__).resolve().parent / "layouts" / "test_e2e_layout.json",
-    }
+    # built-in layout (JSON)-based questionnaires: <type>_layout.json in here
+    layoutDir = Path(__file__).resolve().parent / "layouts"
+    layoutSuffix = "_layout.json"
 
     @staticmethod
-    def initType(experimentType: str) -> Template:
-        if experimentType in GrabExperiment._layout_files:
-            path = GrabExperiment._layout_files[experimentType]
-            if not path.is_file():
-                raise RuntimeError(
-                    f"layout file for experiment type {experimentType!r} not found: {path}")
-            # deferred: questionnaire_layout imports this module by file path
-            from src import questionnaire_layout
-            return questionnaire_layout.build_template(
-                questionnaire_layout.load_layout(path))
-        if experimentType == ExperimentTypes.ROPE:
-            return Rope()
-        elif experimentType == ExperimentTypes.BOTTLENECK:
-            return Bottleneck()
-        elif experimentType == ExperimentTypes.ROPE_SHORT:
-            return RopeShort()
+    def layout_types() -> list[str]:
+        """Names of the built-in layout-based types found in ``layoutDir``."""
+        suffix = GrabExperiment.layoutSuffix
+        return sorted(p.name.removesuffix(suffix) for p in GrabExperiment.layoutDir.glob("*" + suffix))
+
+    @staticmethod
+    def find_layout(experimentType: str) -> Path | None:
+        """Layout file of a built-in layout-based type, None if there is none."""
+        path = GrabExperiment.layoutDir / (experimentType + GrabExperiment.layoutSuffix)
+        return path if path.is_file() else None
+
+    @staticmethod
+    def load_layout_template(path: str | Path) -> Template:
+        path = Path(path)
+        if not path.is_file():
+            raise RuntimeError(f"layout file not found: {path}")
+        # deferred: questionnaire_layout imports this module by file path
+        from src import questionnaire_layout
+
+        return questionnaire_layout.build_template(questionnaire_layout.load_layout(path))
+
+    @staticmethod
+    def initType(experimentType: str, layout: str | Path | None = None, baseDir: str | Path | None = None) -> Template:
+        """Template of a survey form.
+
+        An explicit ``layout`` file (relative paths are taken relative to ``baseDir``)
+        wins over the type name; the name then only labels the form. Otherwise the
+        name is a legacy type or a built-in layout in ``layoutDir``.
+        """
+        if layout is not None:
+            path = Path(layout)
+            if baseDir is not None and not path.is_absolute():
+                path = Path(baseDir) / path
+            return GrabExperiment.load_layout_template(path)
+        if experimentType in ExperimentTypes:
+            experimentType = ExperimentTypes(experimentType)
+            if experimentType == ExperimentTypes.ROPE:
+                return Rope()
+            elif experimentType == ExperimentTypes.BOTTLENECK:
+                return Bottleneck()
+            elif experimentType == ExperimentTypes.ROPE_SHORT:
+                return RopeShort()
+        path = GrabExperiment.find_layout(experimentType)
+        if path is not None:
+            return GrabExperiment.load_layout_template(path)
+        raise RuntimeError(
+            f"Unknown experiment type {experimentType!r}. Valid types: "
+            f"{[str(t) for t in ExperimentTypes] + GrabExperiment.layout_types()} or a path to a layout JSON file."
+        )
+
+    @staticmethod
+    def initFromMetadata(metadata: dict, baseDir: str | Path, surveyMetadata: dict | None = None) -> Template:
+        """Template of the experiment in ``metadata.json`` (in ``baseDir``), or of one of
+        its surveys: a survey with its own "type" and/or "layout" uses only those, as its
+        form differs from the rest of the experiment."""
+        experiment = metadata["Experiment"]
+        if surveyMetadata is not None and ("type" in surveyMetadata or "layout" in surveyMetadata):
+            experimentType = surveyMetadata.get("type", experiment["Type"])
+            layout = surveyMetadata.get("layout")
         else:
-            raise RuntimeError("Unknown experiment type.")
+            experimentType, layout = experiment["Type"], experiment.get("Layout")
+        return GrabExperiment.initType(experimentType, layout, baseDir)
 
     @staticmethod
     def get_page_bounds(template: Template):
