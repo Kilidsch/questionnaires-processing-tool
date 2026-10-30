@@ -1,22 +1,10 @@
-"""GUI widgets of layout-based forms, built headless (no window is shown)."""
-
-import os
-
-os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
-
-import pytest
-from PyQt5 import QtWidgets as qtWid
+"""GUI widgets of layout-based forms, built headless (see conftest.py)."""
 
 from src.guiWidgets import BoundCheckBox, BoundCheckTableWidget, QuestionWidget
 from src.survey_templates import GrabExperiment
 
 
-@pytest.fixture(scope="module")
-def app():
-    return qtWid.QApplication.instance() or qtWid.QApplication([])
-
-
-def test_check_table_without_diagram(app):
+def test_check_table_without_diagram(qt_errors):
     # test_e2e Q5 has a check table but no body diagram; area_grabbing still
     # writes a "diagram" entry for every question
     question = {q.num: q for q in GrabExperiment.initType("test_e2e").get_questions()}[5]
@@ -46,7 +34,7 @@ def test_check_table_without_diagram(app):
     assert (focused[-1].page, focused[-1].dx, focused[-1].dy) == (table.page, table.dx[1], table.dy)
 
 
-def test_check_table_without_detection(app):
+def test_check_table_without_detection(qt_errors):
     question = {q.num: q for q in GrabExperiment.initType("test_e2e").get_questions()}[5]
     question_json = {"question": question.questionText, "table": {"name": "", "data": {}}}
 
