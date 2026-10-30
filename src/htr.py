@@ -2,7 +2,7 @@
 # Copyright (c) 2026 Marvin Lorber
 
 __license__ = "MIT"
-__author__ = "Marvin Lorber"
+__author__ = ["Marvin Lorber"]
 
 from transformers import TrOCRProcessor, VisionEncoderDecoderModel
 from PIL import Image
