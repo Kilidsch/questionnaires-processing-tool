@@ -10,6 +10,7 @@ from PIL import Image
 import numpy as np
 import os
 import pickle
+from types import SimpleNamespace
 
 from src.survey_templates import DiagramAreas
 
@@ -447,6 +448,57 @@ class BoundTableWidget(qtWid.QFrame):
         return super().eventFilter(obj, e)
 
 
+class BoundCheckTableWidget(qtWid.QFrame):
+    """Check table of a layout-based form (no body diagram): one checkbox per cell,
+    a ticked cell is stored as data[row][column] = True like area_grabbing does."""
+
+    # emits the area of the cell that is being edited
+    focused = QtCore.pyqtSignal(object)
+
+    def __init__(self, template, json_ref):
+        super().__init__()
+
+        self.json_ref = json_ref
+        self.json_ref.setdefault("data", {})
+
+        layout = qtWid.QGridLayout(self)
+
+        # ---- HEADER ----
+        for col, text in enumerate(template.columns, start=1):
+            wHeader = qtWid.QLabel(text)
+            wHeader.setStyleSheet("font-weight:bold")
+            layout.addWidget(wHeader, 0, col)
+
+        # ---- ROWS ----
+        # same row height as the detection in area_grabbing.parse_single_data
+        step_y = int(template.size_y / len(template.rows))
+        for i, row in enumerate(template.rows):
+            layout.addWidget(qtWid.QLabel(row), i + 1, 0)
+            for j, column in enumerate(template.columns):
+                cell = SimpleNamespace(
+                    page=template.page,
+                    dx=template.dx[j],
+                    dy=template.dy + i * step_y,
+                    size_x=template.size_x[j],
+                    size_y=step_y,
+                )
+                checked = bool(self.json_ref["data"].get(row, {}).get(column, False))
+                # BoundCheckBox for focus and enter handling, its own json is not used
+                w = BoundCheckBox("", cell, {"answer": checked})
+                w.stateChanged.connect(lambda state, r=row, c=column: self.write_json(r, c, state))
+                w.focused.connect(self.focused)
+                layout.addWidget(w, i + 1, j + 1)
+
+        self.setSizePolicy(qtWid.QSizePolicy.Expanding, qtWid.QSizePolicy.Fixed)
+
+    def write_json(self, row, column, state):
+        cells = self.json_ref["data"].setdefault(row, {})
+        if state:
+            cells[column] = True
+        else:
+            cells.pop(column, None)
+
+
 # ---------------------------
 # Question Widget
 # ---------------------------
@@ -498,8 +550,8 @@ class QuestionWidget(qtWid.QFrame):
             layout.addWidget(w)
             elements.append(txt_template)
 
-        # diagram
-        if ("diagram" in question_json) and ("table" in question_json):
+        # diagram (its tables are shown merged below it); every question has a "diagram" entry in the json
+        if question_template.diagramms and ("diagram" in question_json) and ("table" in question_json):
             wDiagram = BoundDiagramWidget(
                 question_template.diagramms[0],
                 question_json,
@@ -516,6 +568,19 @@ class QuestionWidget(qtWid.QFrame):
             wDiagram.tableChanged.connect(wTable.update_table)
             layout.addWidget(wTable)
             # elements.append(table_template)
+
+        # check tables without a diagram (layout-based forms)
+        elif question_template.tables:
+            table_jsons = question_json.get("table")
+            if not isinstance(table_jsons, list) or len(table_jsons) != len(question_template.tables):
+                # nothing usable detected: one empty entry per table
+                table_jsons = [{"name": "", "data": {}} for _ in question_template.tables]
+                question_json["table"] = table_jsons
+            for table_template, table_json in zip(question_template.tables, table_jsons):
+                w = BoundCheckTableWidget(table_template, table_json)
+                w.focused.connect(self.elementFocused)
+                layout.addWidget(w)
+                elements.append(table_template)
 
         self.setLayout(layout)
 
