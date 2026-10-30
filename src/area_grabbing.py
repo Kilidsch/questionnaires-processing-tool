@@ -290,14 +290,21 @@ def parse_single_data(imgDir, files, template: Template) -> str:
                     )
                 print(f"Question {question.num}-{checkbox.text}:{grade}")
 
-            for textfield in question.texts:
+            for text_index, textfield in enumerate(question.texts):
                 if textfield.page not in pages:
                     textfieldData.append({"text": "", "file": ""})
                     continue
                 top = int(AnkerPos.Y.value + textfield.dy)
                 left = int(AnkerPos.X.value + textfield.dx)
 
-                filePath = f"{imgDir}/question_{question.num}_freeText.jpg"
+                # one file per field: a question may have several free-text
+                # boxes (e.g. the 15 measurements) that would overwrite each other
+                if len(question.texts) == 1:
+                    filePath = f"{imgDir}/question_{question.num}_freeText.jpg"
+                else:
+                    filePath = (
+                        f"{imgDir}/question_{question.num}_freeText_{text_index + 1}.jpg"
+                    )
                 cv2.imwrite(
                     filePath,
                     pages[textfield.page].img[

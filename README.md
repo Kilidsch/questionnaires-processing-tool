@@ -1,4 +1,6 @@
-# Annotation GUI for LoStInCrowds
+# Questionnaire Scanner
+
+(This is a continued developement from the "Annotation GUI for LoStInCrowds" that was initially developed by [DKZ.2R](https://www.dkz2r.de/))
 
 This project was created to digitize the data from scanned paper surveys. It contains two steps, preparation and annotation.
 In the preparation step simple data points like check boxes are automatically evaluated and the data structure gets created.
@@ -27,7 +29,7 @@ The script requires at least the experiment's directory. It expects a single PDF
     },
 ```
 
-The experiment types are `bottleneck`, `rope` and `rope_short`. `rope_short` is for Rope sessions in which only the two contact pages of the Bottleneck form (pages 5 and 6) were used instead of the Rope form, e.g. Rope_Montag and Rope_Dienstag. A survey whose form differs from the rest of the experiment gets its own `"type"` in its entry of `surveyResponses` in `metadata.json`; the GUI then uses that template for it.
+The experiment types are `bottleneck`, `rope` and `rope_short` (hardcoded legacy forms), the name of a built-in layout-based Typst form in `src/layouts/` such as `test_e2e`, or the path to any layout JSON file — see [Layout-based questionnaires (Typst forms)](#layout-based-questionnaires-typst-forms). For a layout-based form, `prepareData.py` copies the layout next to `metadata.json` as `layout.json` and records it as `"Layout": "layout.json"` under `"Experiment"`; the GUI loads the form from that copy, so re-exporting the form later does not change surveys that were already processed. `rope_short` is for Rope sessions in which only the two contact pages of the Bottleneck form (pages 5 and 6) were used instead of the Rope form, e.g. Rope_Montag and Rope_Dienstag. A survey whose form differs from the rest of the experiment gets its own `"type"` (a legacy or built-in type) and/or `"layout"` (a layout JSON file, relative to `metadata.json`) in its entry of `surveyResponses` in `metadata.json`; the GUI then uses that template for it.
 
 The current output folder structure after parsing is shown below. Changes are possible, but please remember to change the respective experiment directories listed in the experiment's `metadata.json` as well.
 
@@ -35,6 +37,7 @@ The current output folder structure after parsing is shown below. Changes are po
     mainFolder
     |-<date>_<experiment>
     |   |-metadata.json
+    |   |-layout.json   <-- copy of the form's layout, for layout-based forms only
     |   |-originalData.pdf
     |   |-surveyResponse_<nr>
     |   |   |-page0
@@ -62,6 +65,137 @@ After `Done` or `Report weird things and go back`, the survey closes and the nex
 ### Optical character recognition
 
 To detect single lines of printed writing, use `ocr()` in [ocr.py](/src/ocr.py). For detection of handwriting try out `recognize_handwriting()` in [htr.py](/src/htr.py). `htr.py` requires additional pip libraries that are currently commented out in the pyproject.toml
+
+## Layout-based questionnaires (Typst forms)
+
+Questionnaires can be authored in [Typst](https://typst.app/) instead of the
+hardcoded legacy classes. The form is compiled to a PDF; a script extracts every
+element's page and position from the compiled document into a layout JSON; the
+processing tool loads that JSON and builds the same `Template` objects the GUI
+and the detector already use. Writing, scanning and annotating work exactly as
+before — only the source of the coordinates changes.
+
+Two documents live in the repo:
+
+- `typst_src/lib.typ` — the helpers (`checkbox`, `checkbox-grid`, `freetext`,
+  `checktable`, `question`, `template`) plus the corner ArUco tags that define
+  the coordinate system. The printed tags are detected on the scan and used to
+  deskew it.
+- `typst_src/test_e2e.typ` — the reference form, built in as `test_e2e`
+  (6 questions over 2 auto-paginated pages, every element kind).
+
+### Prerequisites
+
+- `uv sync`
+- Typst CLI 0.15 or newer on `PATH` (`typst --version`). On Windows, install it
+  from https://typst.app or with `winget install Typst.Typst`.
+
+### Creating a new questionnaire
+
+1. Write `typst_src/<name>.typ` using the helpers. A minimal form:
+
+```typst
+#import "lib.typ": *
+
+#set page(paper: "a4", margin: page-margins, background: page-corner-tags)
+
+#template(
+  "Beispielfragebogen",
+  (
+    question(1, "Wie haben Sie die Übung empfunden?",
+      stack(
+        spacing: 8pt,
+        checkbox("gut", question: 1),
+        checkbox("schlecht", question: 1),
+        freetext(1600, 400, question: 1),
+      ),
+    ),
+  ),
+)
+```
+
+   `template()` adds the centered "ID" header row (four digit boxes) in the
+   top page margin, above the title, by default; it is placed outside the
+   content flow (no space is taken from the questions), and `num-digits: 0`
+   omits it. Several elements of one
+   question go into one `stack(...)`; `template()` takes the array of
+   `question(...)` calls.
+
+   Long option lists fit better in several columns: `checkbox-grid((...),
+   columns: 3, question: N)` lays the checkboxes out row-major in equal-width
+   columns (`columns` defaults to 2). For a multi-page form, pass the question
+   numbers that should start a new page, e.g.
+   `template(title, questions, breaks: (5,))` — an explicit `pagebreak()` is
+   used internally, so the layout does not depend on element sizes.
+
+2. Compile and export the layout:
+
+   ```
+   uv run python scripts/export_layout.py typst_src/<name>.typ
+   ```
+
+   This writes `output/<name>.pdf` and `output/<name>_layout.json` (positions in
+   deskewed 500 dpi px, the detector's coordinate space).
+
+3. Process the scans with the layout file directly — no code change is needed:
+
+   ```
+   python prepareData.py <dir> output/<name>_layout.json
+   ```
+
+   The experiment type is named after the document (`<name>`).
+
+4. Optional: to use the form by name (`python prepareData.py <dir> <name>`),
+   copy the JSON to `src/layouts/<name>_layout.json`. Every file there is found
+   automatically, and `uv run pytest` checks it against the design constraints
+   below. Add assertions specific to the form in `tests/test_layout_types.py`
+   only if you want them as a regression test.
+
+### Design constraints
+
+- **Each `checktable` must fit on one page.** The detector's `CheckTable` model
+  has a single page and cannot represent rows split by a page break. Keep
+  auto-pagination on and size the table (or the content above it) so a break
+  never lands inside a table. `tests/test_layout_types.py` enforces this for
+  every layout in `src/layouts/`.
+- **Do not give one question exactly three tables.** `parse_single_data` merges
+  three tables of a question into one frequency/intensity/safety table (a
+  Bottleneck-specific case).
+- **The "ID" row is on by default** (`num-digits: 4` in `template(...)`). The
+  participant writes one digit per box; the number itself is typed into the
+  GUI, which shows that area as the participant number. The row sits in the
+  top page margin, vertically centered on the corner-tag band (it is narrow
+  and centered, so it cannot overlap the tags), and takes no content space.
+  Its layout `dy` is therefore negative: it starts above the printed tag
+  centre that defines the dx/dy origin.
+- **Page breaks:** list the questions that start a new page in `breaks:`
+  rather than sizing elements until they overflow. Each `checktable` must
+  still fit on its page.
+- **Do not move the corner tags.** Their distance (3080 px ≈ 156.5 mm) is what
+  `deskew()` normalizes the scan against; changing it rescales every element.
+  They are printed symmetrically (x = 527 / 3607 px, 18.97 mm from the page
+  edges), which is 118 px left of the deskew targets. Each tag also emits an
+  `aruco` record with its centre, so the export takes the `dx`/`dy` origin from
+  the document itself: the layout JSON carries it as `"anchor": [527, 375]`.
+  Moving the tags therefore needs no code change — just re-export.
+
+The layout JSON and the test fixture PDF are generated by the same compile; if
+`lib.typ` changes, regenerate both together (see `tests/fixtures/test_e2e.pdf`).
+
+### Processing
+
+Run `python prepareData.py <dir> <name or layout JSON path>` and then
+`python annotateData.py <dir>`, e.g. with `test_e2e` for the reference form.
+
+## Tests
+
+Run `uv run pytest`. The GUI tests run headless on Qt's `offscreen` platform:
+`tests/test_gui_smoke.py` opens the survey window for every layout in
+`src/layouts/` and finishes it. PyQt5 aborts the whole process (exit code
+`0xC0000409` on Windows, often without a traceback) when a Qt callback such as
+`resizeEvent` raises; the `qt_errors` fixture in `tests/conftest.py` records
+these exceptions instead and fails the test with their traceback, so use it in
+every GUI test.
 
 ## License
 
