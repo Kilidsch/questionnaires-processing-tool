@@ -1,4 +1,6 @@
-# Annotation GUI for LoStInCrowds
+# Questionnaire Scanner
+
+(This is a continued developement from the "Annotation GUI for LoStInCrowds" that was initially developed by [DKZ.2R](https://www.dkz2r.de/))
 
 This project was created to digitize the data from scanned paper surveys. It contains two steps, preparation and annotation.
 In the preparation step simple data points like check boxes are automatically evaluated and the data structure gets created.
